@@ -1,5 +1,7 @@
 from collections import Counter
 from multiprocessing import Pool
+import os
+import time
 
 
 def parse_line(line):
@@ -10,9 +12,16 @@ def parse_line(line):
     return level, ip, message
 
 
-def process_chunk(lines):
+def process_chunk(chunk_data):
+    chunk_id, lines = chunk_data
+
     level_counts = Counter()
     ip_counts = Counter()
+
+    pid = os.getpid()
+    start = time.time()
+
+    print(f"Worker {pid} started processing chunk {chunk_id} with {len(lines)} lines")
 
     for line in lines:
         if not line.strip():
@@ -22,6 +31,9 @@ def process_chunk(lines):
         level_counts[level] += 1
         ip_counts[ip] += 1
 
+    end = time.time()
+    print(f"Worker {pid} finished chunk {chunk_id} in {end - start:.4f} seconds")
+
     return level_counts, ip_counts
 
 
@@ -29,7 +41,7 @@ def make_small_chunks(lines, chunk_size):
     chunks = []
 
     for i in range(0, len(lines), chunk_size):
-        chunks.append(lines[i:i + chunk_size])
+        chunks.append((i // chunk_size, lines[i:i + chunk_size]))
 
     return chunks
 
