@@ -1,8 +1,10 @@
 import random
 from collections import Counter
 
+# Log levels
 LOG_LEVELS = ["INFO", "ERROR", "WARN"]
 
+# Sample log messages
 MESSAGES = [
     "User logged in",
     "File accessed",
@@ -14,6 +16,9 @@ MESSAGES = [
 
 
 def generate_ip_pool(n):
+    """
+    Generate n unique IP addresses in the format 192.168.x.y
+    """
     ips = []
     for i in range(n):
         third = i // 256
@@ -24,6 +29,9 @@ def generate_ip_pool(n):
 
 
 def pick_random_ip(ips, num_lines):
+    """
+    Select IP's randomely
+    """
     selected_ips = []
     for i in range(num_lines):
         ip = random.choice(ips)
@@ -32,6 +40,9 @@ def pick_random_ip(ips, num_lines):
 
 
 def pick_skewed_ips(ips, num_lines, s):
+    """
+    Select IP's with a skewed distribution based on Zipf's law with parameter s.
+    """
     weights = []
     for i in range(len(ips)):
         rank = i + 1
@@ -46,10 +57,14 @@ def pick_skewed_ips(ips, num_lines, s):
     return selected_ips
 
 
-def generate_log_line(selected_ip):
+def generate_log_lines(selected_ips):
+    """
+    Generate log lines for the selected IP addresses.
+    """
+
     log_lines = []
 
-    for ip in selected_ip:
+    for ip in selected_ips:
         level = random.choice(LOG_LEVELS)
         message = random.choice(MESSAGES)
 
@@ -59,17 +74,31 @@ def generate_log_line(selected_ip):
 
 
 def write_logs_to_file(log_lines, output_path):
+    """
+    Write the generated log lines to a file.
+    """
     with open(output_path, 'w') as f:
         for line in log_lines:
             f.write(line + '\n')
 
 
 if __name__ == "__main__":
-    ips = generate_ip_pool(5)
-    selected = pick_skewed_ips(ips, 10, s=1.0)
+    """
+    Generate synthetic log data with skewed IP distribution and write to logs.txt
+    """
+    ips = generate_ip_pool(1000)  # Generate 1000 unique IP addresses
+    sizes = [100000, 500000, 1000000]
 
-    # counts = Counter(selected)
-    logs = generate_log_line(selected)
+    for size in sizes:
 
-    write_logs_to_file(logs, "logs.txt")
-    print("Generated logs written to logs.txt")
+        print(f"Generating {size} lines...")
+
+        selected = pick_skewed_ips(ips, size, s=1.0)
+
+        logs = generate_log_lines(selected)
+
+        filename = f"logs_{size}.txt"
+
+        write_logs_to_file(logs, filename)
+
+        print(f"{filename} created")

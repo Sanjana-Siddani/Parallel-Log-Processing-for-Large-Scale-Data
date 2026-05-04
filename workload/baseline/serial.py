@@ -1,43 +1,47 @@
 from collections import Counter
+import time
+
 
 def parse_line(line):
-    parts = line.strip().split(" ", 2)
+    """Break down a line from the log file and extract the IP address."""
+    parts = line.strip().split("\t")
 
-    level = parts[0].strip("[]")
-    ip = parts[1]
-    message = parts[2] if len(parts) > 2 else ""
-    return level, ip, message
+    if len(parts) < 1:  # if no IP found
+        return None
+
+    return parts[0]  # IP
+
 
 def process_log_file(file_path, top_n):
-    level_counts = Counter()
+    """Read the log file, count IP occurrences, and return the top N IPs."""
     ip_counts = Counter()
 
-    with open(file_path, 'r') as f:
+    with open(file_path, 'r', encoding='latin-1') as f:
         for line in f:
-            
             if not line.strip():
                 continue
-            level, ip, message = parse_line(line)
 
-            level_counts[level] += 1
+            ip = parse_line(line)
+
+            if ip is None:
+                continue
+
             ip_counts[ip] += 1
 
     top_ips = ip_counts.most_common(top_n)
-    return level_counts, ip_counts, top_ips
+    return ip_counts, top_ips
+
 
 if __name__ == "__main__":
-    log_file_path = "../../logs.txt"
+    """It processes the log file and prints the top IPs and execution time."""
+    log_file_path = "log_1.tsv"
 
-    level_counts,ip_counts, top_ips = process_log_file(log_file_path, top_n=3)
+    start = time.perf_counter()
+    ip_counts, top_ips = process_log_file(log_file_path, top_n=3)
+    end = time.perf_counter()
 
-    print("Log Level Counts:")
-    for level, count in level_counts.items():
-        print(f"{level}: {count}")
-
-    print("\nIP Address Counts:")
-    for ip, count in ip_counts.items():
-        print(f"{ip}: {count}")
-
-    print("\nTop IP Addresses:")
+    print("Top IPs:")
     for ip, count in top_ips:
-        print(f"{ip}: {count}")
+        print(ip, count)
+
+    print("Time:", end - start)
