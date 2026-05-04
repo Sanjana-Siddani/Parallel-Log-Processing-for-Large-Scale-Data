@@ -5,7 +5,7 @@ from src.generator.utils import simulate_comm_cost
 
 
 def parse_line(line):
-    parts = line.strip().split("\t")  # TAB split
+    parts = line.strip().split("\t")  # TAB split is used to separate files
 
     if len(parts) < 1:
         return None
@@ -15,6 +15,7 @@ def parse_line(line):
 
 
 def process_chunk(lines):
+    # Count how many times the same IP appears.
     ip_counts = Counter()
 
     for line in lines:
@@ -31,6 +32,7 @@ def process_chunk(lines):
 
 
 def build_buckets(lines, num_workers):
+    # Create buckets for each worker based on a hash.
     buckets = [[] for _ in range(num_workers)]
 
     for line in lines:
@@ -50,14 +52,22 @@ def build_buckets(lines, num_workers):
 def comm_aware_schedule(file_path, num_workers=4, top_n=3, alpha=0):
     start = time.perf_counter()
 
-    with open(file_path, 'r', encoding='latin-1') as f:
-        lines = f.readlines()
+    # open file and read lines
+    f = open(file_path, 'r', encoding='latin-1')
+    lines = f.readlines()
+    f.close()
 
+    # build communication-aware buckets
     buckets = build_buckets(lines, num_workers)
 
-    with Pool(num_workers) as pool:
-        results = pool.map(process_chunk, buckets)\
-            # simulate communication cost
+    # create pool manually
+    # pool means we are creating a pool of worker processes that can run concurrently.
+    pool = Pool(num_workers)
+    results = pool.map(process_chunk, buckets)
+    pool.close()
+    pool.join()
+
+    # simulate communication cost
     size, comm_delay = simulate_comm_cost(results, alpha)
 
     total_ip_counts = Counter()
@@ -71,7 +81,7 @@ def comm_aware_schedule(file_path, num_workers=4, top_n=3, alpha=0):
 
 
 if __name__ == "__main__":
-    log_file_path = "log_1.tsv"
+    log_file_path = "log_1.tsv"  # Logs path
 
     counts, top_ips, t, size, comm = comm_aware_schedule(
         log_file_path,

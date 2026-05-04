@@ -39,13 +39,19 @@ def make_chunks(lines, chunk_size):
 def dynamic_schedule(file_path, num_workers=4, top_n=3, chunk_size=1000):
     start = time.perf_counter()
 
-    with open(file_path, 'r', encoding='latin-1') as f:
-        lines = f.readlines()
+    # open file and read lines
+    f = open(file_path, 'r', encoding='latin-1')
+    lines = f.readlines()
+    f.close()
 
+    # split into smaller chunks
     chunks = make_chunks(lines, chunk_size)
 
-    with Pool(num_workers) as pool:
-        results = list(pool.imap_unordered(process_chunk, chunks))
+    # create pool manually
+    pool = Pool(num_workers)
+    results = list(pool.imap_unordered(process_chunk, chunks))
+    pool.close()
+    pool.join()
 
     total_ip_counts = Counter()
     for r in results:

@@ -49,13 +49,19 @@ def build_buckets(lines, num_workers):
 def comm_aware_schedule(file_path, num_workers=4, top_n=3):
     start = time.perf_counter()
 
-    with open(file_path, 'r', encoding='latin-1') as f:
-        lines = f.readlines()
+    # open file and read lines
+    f = open(file_path, 'r', encoding='latin-1')
+    lines = f.readlines()
+    f.close()
 
+    # create buckets based on communication-aware logic
     buckets = build_buckets(lines, num_workers)
 
-    with Pool(num_workers) as pool:
-        results = pool.map(process_chunk, buckets)
+    # create pool manually
+    pool = Pool(num_workers)
+    results = pool.map(process_chunk, buckets)
+    pool.close()
+    pool.join()
 
     total_ip_counts = Counter()
     for r in results:

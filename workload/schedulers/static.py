@@ -46,17 +46,21 @@ def split_into_chunks(lines, num_workers):
 
 
 def static_schedule(file_path, num_workers=4, top_n=3):
-    """Divide the log file into equal chunks and process them in parallel, then combine results."""
     start = time.perf_counter()
 
-    with open(file_path, 'r', encoding='latin-1') as f:
-        lines = f.readlines()
+    # open file and read lines
+    f = open(file_path, 'r', encoding='latin-1')
+    lines = f.readlines()
+    f.close()
 
-    # Split the log lines into equal chunks for each worker
+    # split lines into equal chunks
     chunks = split_into_chunks(lines, num_workers)
 
-    with Pool(num_workers) as pool:  # Create a pool of worker processes
-        results = pool.map(process_chunk, chunks)
+    # create pool manually
+    pool = Pool(num_workers)
+    results = pool.map(process_chunk, chunks)
+    pool.close()
+    pool.join()
 
     total_ip_counts = Counter()
     for r in results:

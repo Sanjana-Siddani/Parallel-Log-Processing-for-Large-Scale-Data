@@ -31,6 +31,7 @@ def process_chunk(lines):
 
 
 def split_into_chunks(lines, num_workers):
+    # Divide the list of lines into equal chunks for each worker.
     chunk_size = len(lines) // num_workers
     chunks = []
 
@@ -47,15 +48,22 @@ def split_into_chunks(lines, num_workers):
 
 
 def static_schedule(file_path, num_workers=4, top_n=3, alpha=0):
-    start = time.perf_counter()
+    start = time.perf_counter()  # Start timer
 
-    with open(file_path, 'r', encoding='latin-1') as f:
-        lines = f.readlines()
+    # open file and read lines
+    f = open(file_path, 'r', encoding='latin-1')
+    lines = f.readlines()
+    f.close()
 
+    # split the log lines into chunks
     chunks = split_into_chunks(lines, num_workers)
 
-    with Pool(num_workers) as pool:
-        results = pool.map(process_chunk, chunks)
+    # create pool of workers
+    pool = Pool(num_workers)
+    results = pool.map(process_chunk, chunks)
+    pool.close()
+    pool.join()
+
     # simulate communication cost
     size, comm_delay = simulate_comm_cost(results, alpha)
 
@@ -65,13 +73,14 @@ def static_schedule(file_path, num_workers=4, top_n=3, alpha=0):
 
     top_ips = total_ip_counts.most_common(top_n)
 
-    end = time.perf_counter()
+    end = time.perf_counter()  # End timer
     return total_ip_counts, top_ips, (end - start), size, comm_delay
 
 
 if __name__ == "__main__":
     log_file_path = "log_1.tsv"
 
+    """It processes the log file using static scheduling and prints the top IPs, execution time, size, and communication delay."""
     counts, top_ips, t, size, comm = static_schedule(
         log_file_path,
         num_workers=4,

@@ -5,7 +5,7 @@ from src.generator.utils import simulate_comm_cost
 
 
 def parse_line(line):
-    """Parse a log line and extract the IP address."""
+    # Parse a log line and extract the IP address.
     parts = line.strip().split("\t")  # TAB split
 
     if len(parts) < 1:
@@ -39,19 +39,30 @@ def make_chunks(lines, chunk_size):
 
 def dynamic_schedule(file_path, num_workers=4, top_n=3, chunk_size=1000, alpha=0):
     start = time.perf_counter()
-    with open(file_path, 'r', encoding='latin-1') as f:
-        lines = f.readlines()
+
+    # open file and read lines
+    f = open(file_path, 'r', encoding='latin-1')
+    lines = f.readlines()
+    f.close()
+
+    # create smaller chunks for dynamic scheduling
     chunks = make_chunks(lines, chunk_size)
-    with Pool(num_workers) as pool:
-        results = list(pool.imap_unordered(process_chunk, chunks))
+
+    # create pool manually
+    pool = Pool(num_workers)
+    results = list(pool.imap_unordered(process_chunk, chunks))
+    pool.close()
+    pool.join()
 
     # simulate communication cost
     size, comm_delay = simulate_comm_cost(results, alpha)
-    total_ip_counts = Counter()
 
+    total_ip_counts = Counter()
     for r in results:
         total_ip_counts.update(r)
+
     top_ips = total_ip_counts.most_common(top_n)
+
     end = time.perf_counter()
 
     return total_ip_counts, top_ips, (end - start), size, comm_delay
