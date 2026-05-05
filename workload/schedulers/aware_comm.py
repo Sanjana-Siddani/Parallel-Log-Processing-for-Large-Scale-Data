@@ -5,12 +5,12 @@ from src.generator.utils import simulate_comm_cost
 
 
 def parse_line(line):
-    parts = line.strip().split("\t")  # TAB split is used to separate files
+    parts = line.strip().split(" ", 2)
 
-    if len(parts) < 1:
+    if len(parts) < 2:
         return None
 
-    ip = parts[0]
+    ip = parts[1]
     return ip
 
 
@@ -81,7 +81,7 @@ def comm_aware_schedule(file_path, num_workers=4, top_n=3, alpha=0):
 
 
 if __name__ == "__main__":
-    log_file_path = "log_1.tsv"  # Logs path
+    log_file_path = "logs_1000000.txt"  # Logs path
 
     counts, top_ips, t, size, comm = comm_aware_schedule(
         log_file_path,

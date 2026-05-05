@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [WARN] 192.168.1.137 File accessed
 [INFO] 192.168.0.41 Disk Full
 [INFO] 192.168.0.3 Timeout
@@ -998,3 +999,15 @@
 [ERROR] 192.168.1.22 Timeout
 [WARN] 192.168.0.18 File accessed
 [ERROR] 192.168.0.2 User logged in
+=======
+[INFO] 192.168.0.0 Request processed
+[INFO] 192.168.0.1 Disk Full
+[INFO] 192.168.0.4 Disk Full
+[ERROR] 192.168.0.0 Disk Full
+[WARN] 192.168.0.3 File accessed
+[INFO] 192.168.0.0 CPU utilization high
+[ERROR] 192.168.0.0 Disk Full
+[WARN] 192.168.0.2 Timeout
+[WARN] 192.168.0.4 Disk Full
+[WARN] 192.168.0.4 CPU utilization high
+>>>>>>> 729fdc6 (Save local changes)
